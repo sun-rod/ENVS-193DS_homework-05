@@ -1,2 +1,2 @@
-# ENVS-193DS_workshop-8
-repo for workshop 8
+# ENVS-193DS_homework-5
+repo for workshop 8 and homework 5
