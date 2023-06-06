@@ -1,27 +1,202 @@
 ---
 title: "scratch-paper"
 author: "Sundeep Rodricks"
-format: html
+format: 
+  html:
+    toc: true
+    toc-location: left
+    code-fold: true
+    theme: yeti 
+  execute: 
+    message: false
+    warning: false
+  
 editor: visual
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
 ```{r}
-1 + 1
+library(tidyverse)
+library(here)
+library(janitor)
+library(ggeffects)
+library(performance)
+library(naniar) # or equivalent
+library(flextable) # or equivalent
+library(car)
+library(broom)
+# would be nice to have
+library(corrplot)
+library(AICcmodavg)
+library(GGally)
+library(MuMIn)
 ```
 
-You can add options to executable code like this
+read in the data
 
-```{r}
-#| echo: false
-2 * 2
+```{r reading-data}
+plant <- read_csv(here("data", "knb-lter-hfr.109.18","hf109-01-sarracenia.csv")) %>%
+  # make the column names cleaner
+  clean_names() %>% 
+  #selecting the columns of interest
+  select(totmass, species, feedlevel, sla, chlorophyll, amass, num_lvs, num_phylls)
+
+plant
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+\# Visualize the missing data:
+
+```{r}
+gg_miss_var(plant)
+```
+
+subsetting the data by dropping NAs
+
+```{r subset-drop-NA}
+plant_subset <- plant %>% 
+  drop_na(sla, chlorophyll, amass, num_lvs, num_phylls)
+```
+
+create a correlation plot:
+
+To determine the relationships between numerical We calculated Pearson's r and visually represented correlation using a correlation plot.
+
+```{r correlation plot}
+# calculate Pearson's R 
+plant_cor <- plant_subset %>% 
+  select(feedlevel:num_phylls) %>% 
+  cor(method = "pearson")
+
+# create a correlation plot
+corrplot(plant_cor,
+         #change the shape of what's in the cells 
+        method = "ellipse",
+         addCoef.col = "black" )
+```
+
+create a plot of each variable compared against the others
+
+```{r pairs-plot}
+plant_subset %>% 
+  select(species:num_phylls) %>% 
+  ggpairs()
+
+```
+
+starting regression here:
+
+To determine how species and physiological characteristics predict biomass, we fit multiple linear models
+
+```{r null-and-full-models}
+null <- lm(totmass ~ 1, data = plant_subset)
+
+# response varible and all predictors
+full <- lm(totmass ~ species + feedlevel + sla + chlorophyll + amass +num_lvs + num_phylls, data = plant_subset)
+```
+
+we visually assess normality and homoskedasticity of residuals using diagnostic plots for the full model:
+
+```{r full-diagnostics}
+par(mfrow = c(2, 2))
+plot(full)
+```
+
+we also tested for normality using the Shapiro-Wilk test (null hypothesis: variable of interest (i.e. residuals) are normally distributed).
+
+We tested for heteroskedasticity using the Breusch-Pagan test (null hypothesis: variable of interest has constant variance)
+
+```{r}
+# when doing the HW write out the test that you did, not the function 
+check_normality(full)
+check_heteroscedasticity(full)
+
+```
+
+```{r model-logs}
+full_log <- lm(log(totmass) ~ totmass ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
+
+plot(full_log)
+check_normality(full_log)
+check_heteroscedasticity(full_log)
+
+plot(full_log)
+check_normality(full_log)
+check_heteroscedasticity(full_log)
+
+```
+
+evaluate multicollinearity
+
+```{r calculate-vif}
+car::vif(full_log)
+```
+
+we evaluated multicollinearity by calculating generalized variance inflation factor and determined that...
+
+try some more models:
+
+addressing the question: what set of predictor variables best explains the response?
+
+```{r}
+model2_log <- lm(log(totmass ~ species, data = plant_subset))
+```
+
+check assumptions for model 2:
+
+```{r}
+plot(model2_log)
+
+check_normality(model2_log)
+check_heteroscedasticity(model2_log)
+
+```
+
+compare models using Akaike's Information criterion (AIC) values:
+
+```{r}
+AICc(full_log)
+AICc(model2_log)
+AICc(null_log)
+
+MuMIn::AICc(full_log,model2_log, null_log)
+MuMIn::model.sel(full_log, model2_log, null_log)
+```
+
+we compared models using AIC and chose the model with the lowest value, which was...
+
+# Results
+
+We found that the \_\_\_\_\_\_ model including \_\_\_ \_\_\_ \_\_\_ predictors best predicted \_\_\_\_\_\_(model summary).
+
+```{r}
+summary(full_log)
+
+table <- tidy(full_log, conf.int = TRUE) %>% 
+  # change the P-value numbers if they're really small
+  #change the estimates, standard error, and t-statistics
+  # using mutate
+  # make it into a flextable
+  flextable() %>% 
+  # fit it to the viewer
+  autofit()
+
+```
+
+use 'ggpredict()' to backtransform estimates
+
+```{r}
+model_pred <- ggpredict(full_log, terms = "species", back.transform = TRUE)
+
+plot(ggpredict(full_log, terms = "species", back.transform = TRUE), add.data = TRUE)
+
+plot(ggpredict(full_log, terms = "chlorophyll", back.transform = TRUE), add.data = TRUE)
+
+plot(ggpredict(full_log, terms = "sla", back.transform = TRUE), add.data = TRUE)
+
+model_pred
+```
+
+# Different types of ANOVAS
+
+```{r}
+
+```

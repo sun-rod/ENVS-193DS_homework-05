@@ -16,6 +16,4 @@ editor: visual
 
 ## Introduction
 
-```{r}
-
-```
+Sarracenia is a genus of pitcher plants that is found in the southeastern United States [@ellison2004].
