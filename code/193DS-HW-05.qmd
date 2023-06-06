@@ -14,6 +14,12 @@ link-citations: true
 editor: visual
 ---
 
+#### Link to GitHub repo:
+
+https://github.com/sun-rod/ENVS-193DS_homework-05
+
 ## Introduction
 
-Sarracenia is a genus of pitcher plants that is found in the southeastern United States [@ellison2004].
+Sarracenia is a genus of pitcher plants that is found in the southeastern United States [@ellison2004]. These carnivorous plants are particularly sensitive to nitrogen availability, which has been increasing in the atmosphere due to anthropogenic activities [@ellison2002]. A certain species of this plant could be a useful tool to measure nitrogen deposition rates [@ellison2002]. Carnivorous plants need significant leaf area to capture prey, since they get certain nutrients from prey that other plants get in other ways [@farnsworth2007]. This study was interested in the effects of prey availability on maximum mass-based photosynthetic rate, or A_mass. The hypothesis being tested in this experiment is that "increased prey availability would stimulate A_mass of one or more leaves, increase photosynthetic N- and P-use efficiencies (PNUEN, PNUEP), increase relative biomass allocation to photosynthetically efficient, non-predatory phyllodes rather than pitchers, increase overall plant biomass, and reduce stress-related chlorophyll fluorescence." \[[@farnsworth2007].
+
+## Methods
