@@ -1,11 +1,13 @@
 ---
 title: "193DS-HW-05"
 author: "Sundeep Rodricks"
-format: html
-  toc: true
-  toc-location: left
-  code-fold: true
-  theme: yeti 
+date: "6/6/23"
+format:
+  html: 
+    toc: true
+    toc-location: left
+    code-fold: true
+    theme: yeti 
 execute:
   message: false
   warning: false 
@@ -16,10 +18,101 @@ editor: visual
 
 #### Link to GitHub repo:
 
-https://github.com/sun-rod/ENVS-193DS_homework-05
+[Repository](https://github.com/sun-rod/ENVS-193DS_homework-05)
+
+```{r echo = FALSE}
+library(tidyverse)
+library(here)
+library(janitor)
+library(ggeffects)
+library(performance)
+library(naniar) # or equivalent
+library(flextable) # or equivalent
+library(car)
+library(broom)
+# would be nice to have
+library(corrplot)
+library(AICcmodavg)
+library(GGally)
+library(MuMIn)
+
+```
 
 ## Introduction
 
-Sarracenia is a genus of pitcher plants that is found in the southeastern United States [@ellison2004]. These carnivorous plants are particularly sensitive to nitrogen availability, which has been increasing in the atmosphere due to anthropogenic activities [@ellison2002]. A certain species of this plant could be a useful tool to measure nitrogen deposition rates [@ellison2002]. Carnivorous plants need significant leaf area to capture prey, since they get certain nutrients from prey that other plants get in other ways [@farnsworth2007]. This study was interested in the effects of prey availability on maximum mass-based photosynthetic rate, or A_mass. The hypothesis being tested in this experiment is that "increased prey availability would stimulate A_mass of one or more leaves, increase photosynthetic N- and P-use efficiencies (PNUEN, PNUEP), increase relative biomass allocation to photosynthetically efficient, non-predatory phyllodes rather than pitchers, increase overall plant biomass, and reduce stress-related chlorophyll fluorescence." \[[@farnsworth2007].
+Sarracenia is a genus of pitcher plants that is found in the southeastern United States [@ellison2004]. These carnivorous plants are particularly sensitive to nitrogen availability, which has been increasing in the atmosphere due to anthropogenic activities [@ellison2002]. A certain species of this plant could be a useful tool to measure nitrogen deposition rates [@ellison2002]. Carnivorous plants need significant leaf area to capture prey, since they get certain nutrients from prey that other plants get in other ways [@farnsworth2007]. This study was interested in the effects of prey availability on maximum mass-based photosynthetic rate, or A~mass~. The hypothesis being tested in this experiment is that "increased prey availability would stimulate A~mass~ of one or more leaves, increase photosynthetic N- and P-use efficiencies (PNUEN, PNUEP), increase relative biomass allocation to photosynthetically efficient, non-predatory phyllodes rather than pitchers, increase overall plant biomass, and reduce stress-related chlorophyll fluorescence." \[[@farnsworth2007].
 
 ## Methods
+
+Twelve plants of each species were chosen at random for this experiment, totaling 120 plants that were each 6 years old [@farnsworth2007]. For each plant, the species, total mass, feed level, specific leaf area, chlorophyll A and B content, mass-based photosynthetic rate, total number of leaves, and number of phyllodes were documented. This data was organized into a table with each of these variables having their own column.
+
+Missing observations are as shown in the figure below. These values were removed before analysis was conducted. There aren't that many missing observations.
+
+```{r echo = FALSE}
+plant <- read_csv(here("data", "knb-lter-hfr.109.18","hf109-01-sarracenia.csv")) %>%
+  # make the column names cleaner
+  clean_names() %>% 
+  #selecting the columns of interest
+  select(totmass, species, feedlevel, sla, chlorophyll, amass, num_lvs, num_phylls)
+
+```
+
+```{r missing-data-visualization}
+gg_miss_var(plant) + 
+  labs(caption = "There are 14 missing observations for A_mass and Chlorophyll, while Specific Leaf Area
+       has 10 and Number of Leaves and Number of Phyllodes have 2 each")
+```
+
+Next, we found Pearson's r. To determine the relationships between numerical variables in our dataset, we calculated Pearson's r and visually represented correlation using a correlation plot. Pearson's r represents how strongly variables are correlated with each other. As shown, maximum mass-based photosynthetic rate and specific leaf area are the most positively correlated.
+
+```{r echo=FALSE}
+plant_subset <- plant %>% 
+  drop_na(sla, chlorophyll, amass, num_lvs, num_phylls)
+```
+
+```{r Pearson}
+# calculate Pearson's R 
+plant_cor <- plant_subset %>% 
+  select(feedlevel:num_phylls) %>% 
+  cor(method = "pearson")
+
+# create a correlation plot
+corrplot(plant_cor,
+         #change the shape of what's in the cells 
+        method = "ellipse",
+         addCoef.col = "black")
+        labs(caption = "A visual representation of Pearson's r, which shows the correlation between each variable. A higher positive number indicates a greater positive correlation, while a lower negative number indicates a greater negative correlation")
+  
+```
+
+This is a plot of how the variables relate to the other variables. This correlation matrix shows how correlated each variable is with another variable. This gives us an overview of the correlation of variables.
+
+```{r correlation-matrix, eval = FALSE}
+plant_subset %>% 
+  select(species:num_phylls) %>% 
+  ggpairs() +
+  labs(caption = "Correlation matrix showing the correlation between all variables")
+```
+
+To determine how species and physiological characteristics predict biomass, we fit multiple linear models
+
+```{r null-and-full-model-creation, echo = FALSE}
+null <- lm(totmass ~ 1, data = plant_subset)
+
+# response varible and all predictors
+full <- lm(totmass ~ species + feedlevel + sla + chlorophyll + amass +num_lvs + num_phylls, data = plant_subset)
+```
+
+This model looks to be homoskedastic based on the residuals vs. fitted plot and Q-Q plot. However, this was not the case as shown in the next test.
+
+```{r full-diagnostics}
+par(mfrow = c(2, 2))
+plot(full)
+```
+
+We used a Shapiro-Wilk test to check for normality and a Breusch-Pagan test for homoskedasticity. This model failed both, necessitating that we transform the data to fit the model. Thiswas done through
+
+```{r assumption-checks}
+check_normality(full)
+check_heteroscedasticity(full)
+```
