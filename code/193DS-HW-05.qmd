@@ -87,7 +87,7 @@ corrplot(plant_cor,
 
 This is a plot of how the variables relate to the other variables. This correlation matrix shows how correlated each variable is with another variable. This gives us an overview of the correlation of variables.
 
-```{r correlation-matrix, eval = FALSE}
+```{r correlation-matrix}
 plant_subset %>% 
   select(species:num_phylls) %>% 
   ggpairs() +
@@ -195,10 +195,25 @@ Model 4 was the best fit for the data because it had the lowest AIC value.
 summary(model4_log)
 ```
 
+```{r}
+model_pred <- ggpredict(model4_log, terms = "species", back.transform = TRUE)
+
+plot(ggpredict(model4_log, terms = "species", back.transform = TRUE), add.data = TRUE)
+
+model_pred
+```
+
 Model 4 takes into account number of leaves, chlorophyll content, feed level, and species. It says that these variables are good predictors of the total mass of the sarracenia plants.
 
 ```{r predictions}
-ggpredict(model4_log)
+table <- tidy(model4_log, conf.int = TRUE) %>% 
+  # change the P-value numbers if they're really small
+  #change the estimates, standard error, and t-statistics
+  # using mutate
+  # make it into a flextable
+  flextable() %>% 
+  # fit it to the viewer
+  autofit()
 ```
 
 Biologically this means that the variables in model 4 can be used to predict the total biomass of this particular genus of plants.

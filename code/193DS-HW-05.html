@@ -201,6 +201,9 @@ attr(,"class")
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggpairs</span>() <span class="sc">+</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">caption =</span> <span class="st">"Correlation matrix showing the correlation between all variables"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output-display">
+<p><img src="193DS-HW-05_files/figure-html/correlation-matrix-1.png" class="img-fluid" width="672"></p>
+</div>
 </div>
 <p>To determine how species and physiological characteristics predict biomass, we fit multiple linear models</p>
 <p>This model looks to be homoskedastic and normal based on the residuals vs.&nbsp;fitted plot and Q-Q plot. However, this was not the case as shown in the next test.</p>
@@ -456,72 +459,22 @@ Multiple R-squared:  0.8611,    Adjusted R-squared:  0.8426
 F-statistic: 46.49 on 12 and 90 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
-<p>Model 4 takes into account number of leaves, chlorophyll content, feed level, and species. It says that these variables are good predictors of the total mass of the sarracenia plants.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggpredict</span>(model4_log)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>model_pred <span class="ot">&lt;-</span> <span class="fu">ggpredict</span>(model4_log, <span class="at">terms =</span> <span class="st">"species"</span>, <span class="at">back.transform =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">ggpredict</span>(model4_log, <span class="at">terms =</span> <span class="st">"species"</span>, <span class="at">back.transform =</span> <span class="cn">TRUE</span>), <span class="at">add.data =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="193DS-HW-05_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>model_pred</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>$num_lvs
-# Predicted values of totmass
-
-num_lvs | Predicted |         95% CI
-------------------------------------
-      2 |      5.92 | [ 4.34,  8.09]
-      4 |      7.03 | [ 5.38,  9.18]
-      5 |      7.65 | [ 5.94,  9.85]
-      7 |      9.07 | [ 7.12, 11.56]
-      9 |     10.76 | [ 8.31, 13.93]
-     10 |     11.72 | [ 8.90, 15.43]
-     12 |     13.90 | [10.06, 19.19]
-     17 |     21.29 | [13.12, 34.53]
-
-Adjusted for:
-* chlorophyll = 471.29
-*   feedlevel =   0.18
-*     species =  alata
-
-$chlorophyll
-# Predicted values of totmass
-
-chlorophyll | Predicted |         95% CI
-----------------------------------------
-        410 |      6.74 | [ 5.17,  8.78]
-        450 |      8.22 | [ 6.46, 10.46]
-        490 |     10.02 | [ 7.80, 12.88]
-        530 |     12.22 | [ 9.13, 16.36]
-        570 |     14.90 | [10.48, 21.20]
-        610 |     18.17 | [11.89, 27.78]
-        650 |     22.16 | [13.40, 36.65]
-        730 |     32.95 | [16.85, 64.44]
-
-Adjusted for:
-*   num_lvs =  7.08
-* feedlevel =  0.18
-*   species = alata
-
-$feedlevel
-# Predicted values of totmass
-
-feedlevel | Predicted |        95% CI
--------------------------------------
-     0.00 |      9.85 | [7.58, 12.80]
-     0.02 |      9.78 | [7.55, 12.68]
-     0.03 |      9.72 | [7.52, 12.56]
-     0.06 |      9.59 | [7.45, 12.34]
-     0.25 |      8.87 | [6.97, 11.30]
-     0.31 |      8.64 | [6.76, 11.04]
-     0.50 |      7.99 | [6.08, 10.51]
-     1.00 |      6.48 | [4.20, 10.00]
-
-Adjusted for:
-*     num_lvs =   7.08
-* chlorophyll = 471.29
-*     species =  alata
-
-$species
-# Predicted values of totmass
+<pre><code># Predicted values of totmass
 
 species     | Predicted |        95% CI
 ---------------------------------------
@@ -537,13 +490,22 @@ rubra       |      6.79 | [5.24,  8.80]
 Adjusted for:
 *     num_lvs =   7.08
 * chlorophyll = 471.29
-*   feedlevel =   0.18
-
-attr(,"class")
-[1] "ggalleffects" "list"        
-attr(,"model.name")
-[1] "model4_log"</code></pre>
+*   feedlevel =   0.18</code></pre>
 </div>
+</div>
+<p>Model 4 takes into account number of leaves, chlorophyll content, feed level, and species. It says that these variables are good predictors of the total mass of the sarracenia plants.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>table <span class="ot">&lt;-</span> <span class="fu">tidy</span>(model4_log, <span class="at">conf.int =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># change the P-value numbers if they're really small</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">#change the estimates, standard error, and t-statistics</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># using mutate</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># make it into a flextable</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">flextable</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># fit it to the viewer</span></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">autofit</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <p>Biologically this means that the variables in model 4 can be used to predict the total biomass of this particular genus of plants.</p>
 
