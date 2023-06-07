@@ -196,6 +196,17 @@ plot(ggpredict(full_log, terms = "sla", back.transform = TRUE), add.data = TRUE)
 model_pred
 ```
 
+```{r}
+model4_log <- lm(log(totmass) ~ num_lvs + chlorophyll + feedlevel + species, data = plant_subset)
+
+par(mfrow = c(2, 2))
+plot(model4_log)
+
+check_normality(model4_log)
+check_heteroscedasticity(model4_log)
+
+```
+
 # Different types of ANOVAS
 
 ```{r}
