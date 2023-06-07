@@ -102,6 +102,7 @@ div.csl-indent {
   <ul>
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a></li>
   </ul>
 </nav>
 </div>
@@ -336,7 +337,7 @@ attr(,"class")
 <pre><code>OK: Error variance appears to be homoscedastic (p = 0.147).</code></pre>
 </div>
 </div>
-<p>Next, we evaluated multicollinearity. This is to see if multiple independent variables are correlated with each other. Through this evaluation, we found that</p>
+<p>Next, we evaluated multicollinearity. This is to see if multiple independent variables are correlated with each other. Through this evaluation, we found that species has high multicollinearity with another variables. We know this because the variance inflation factor was high for species.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -413,6 +414,138 @@ model3_log -144.368 295.0 163.64  0.000
 Models ranked by AICc(x) </code></pre>
 </div>
 </div>
+</section>
+<section id="results" class="level2">
+<h2 class="anchored" data-anchor-id="results">Results</h2>
+<p>Model 4 was the best fit for the data because it had the lowest AIC value.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model4_log)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = log(totmass) ~ num_lvs + chlorophyll + feedlevel + 
+    species, data = plant_subset)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.89093 -0.19455  0.03746  0.24536  0.82010 
+
+Coefficients:
+                    Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)        -1.870225   0.543076  -3.444 0.000873 ***
+num_lvs             0.085263   0.020675   4.124 8.28e-05 ***
+chlorophyll         0.004959   0.001159   4.278 4.69e-05 ***
+feedlevel          -0.417909   0.232623  -1.797 0.075768 .  
+speciesalata        1.216898   0.177947   6.839 9.33e-10 ***
+speciesflava        1.420467   0.190268   7.466 5.08e-11 ***
+speciesjonesii      0.349206   0.197982   1.764 0.081154 .  
+speciesleucophylla  1.804375   0.209193   8.625 2.07e-13 ***
+speciesminor        0.356718   0.187545   1.902 0.060364 .  
+speciespsittacina  -1.670490   0.202271  -8.259 1.19e-12 ***
+speciespurpurea    -0.375537   0.245892  -1.527 0.130207    
+speciesrosea       -0.921023   0.214861  -4.287 4.54e-05 ***
+speciesrubra        0.920885   0.180409   5.104 1.84e-06 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.4177 on 90 degrees of freedom
+Multiple R-squared:  0.8611,    Adjusted R-squared:  0.8426 
+F-statistic: 46.49 on 12 and 90 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>Model 4 takes into account number of leaves, chlorophyll content, feed level, and species. It says that these variables are good predictors of the total mass of the sarracenia plants.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggpredict</span>(model4_log)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$num_lvs
+# Predicted values of totmass
+
+num_lvs | Predicted |         95% CI
+------------------------------------
+      2 |      5.92 | [ 4.34,  8.09]
+      4 |      7.03 | [ 5.38,  9.18]
+      5 |      7.65 | [ 5.94,  9.85]
+      7 |      9.07 | [ 7.12, 11.56]
+      9 |     10.76 | [ 8.31, 13.93]
+     10 |     11.72 | [ 8.90, 15.43]
+     12 |     13.90 | [10.06, 19.19]
+     17 |     21.29 | [13.12, 34.53]
+
+Adjusted for:
+* chlorophyll = 471.29
+*   feedlevel =   0.18
+*     species =  alata
+
+$chlorophyll
+# Predicted values of totmass
+
+chlorophyll | Predicted |         95% CI
+----------------------------------------
+        410 |      6.74 | [ 5.17,  8.78]
+        450 |      8.22 | [ 6.46, 10.46]
+        490 |     10.02 | [ 7.80, 12.88]
+        530 |     12.22 | [ 9.13, 16.36]
+        570 |     14.90 | [10.48, 21.20]
+        610 |     18.17 | [11.89, 27.78]
+        650 |     22.16 | [13.40, 36.65]
+        730 |     32.95 | [16.85, 64.44]
+
+Adjusted for:
+*   num_lvs =  7.08
+* feedlevel =  0.18
+*   species = alata
+
+$feedlevel
+# Predicted values of totmass
+
+feedlevel | Predicted |        95% CI
+-------------------------------------
+     0.00 |      9.85 | [7.58, 12.80]
+     0.02 |      9.78 | [7.55, 12.68]
+     0.03 |      9.72 | [7.52, 12.56]
+     0.06 |      9.59 | [7.45, 12.34]
+     0.25 |      8.87 | [6.97, 11.30]
+     0.31 |      8.64 | [6.76, 11.04]
+     0.50 |      7.99 | [6.08, 10.51]
+     1.00 |      6.48 | [4.20, 10.00]
+
+Adjusted for:
+*     num_lvs =   7.08
+* chlorophyll = 471.29
+*     species =  alata
+
+$species
+# Predicted values of totmass
+
+species     | Predicted |        95% CI
+---------------------------------------
+alabamensis |      2.71 | [2.08,  3.52]
+alata       |      9.13 | [7.17, 11.64]
+flava       |     11.20 | [8.54, 14.69]
+jonesii     |      3.84 | [2.80,  5.26]
+minor       |      3.86 | [2.99,  4.99]
+psittacina  |      0.51 | [0.37,  0.70]
+purpurea    |      1.86 | [1.28,  2.70]
+rubra       |      6.79 | [5.24,  8.80]
+
+Adjusted for:
+*     num_lvs =   7.08
+* chlorophyll = 471.29
+*   feedlevel =   0.18
+
+attr(,"class")
+[1] "ggalleffects" "list"        
+attr(,"model.name")
+[1] "model4_log"</code></pre>
+</div>
+</div>
+<p>Biologically this means that the variables in model 4 can be used to predict the total biomass of this particular genus of plants.</p>
 
 </section>
 

@@ -196,3 +196,9 @@ summary(model4_log)
 ```
 
 Model 4 takes into account number of leaves, chlorophyll content, feed level, and species. It says that these variables are good predictors of the total mass of the sarracenia plants.
+
+```{r predictions}
+ggpredict(model4_log)
+```
+
+Biologically this means that the variables in model 4 can be used to predict the total biomass of this particular genus of plants.
