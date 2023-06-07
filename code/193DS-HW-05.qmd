@@ -203,7 +203,7 @@ plot(ggpredict(model4_log, terms = "species", back.transform = TRUE), add.data =
 model_pred
 ```
 
-Model 4 takes into account number of leaves, chlorophyll content, feed level, and species. It says that these variables are good predictors of the total mass of the sarracenia plants.
+Model 4 takes into account number of leaves, chlorophyll content, feed level, and species. It shows that these variables are good predictors of the total mass of the sarracenia plants.
 
 ```{r predictions}
 table <- tidy(model4_log, conf.int = TRUE) %>% 
