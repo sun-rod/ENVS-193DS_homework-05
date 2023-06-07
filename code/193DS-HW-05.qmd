@@ -103,16 +103,96 @@ null <- lm(totmass ~ 1, data = plant_subset)
 full <- lm(totmass ~ species + feedlevel + sla + chlorophyll + amass +num_lvs + num_phylls, data = plant_subset)
 ```
 
-This model looks to be homoskedastic based on the residuals vs. fitted plot and Q-Q plot. However, this was not the case as shown in the next test.
+This model looks to be homoskedastic and normal based on the residuals vs. fitted plot and Q-Q plot. However, this was not the case as shown in the next test.
 
 ```{r full-diagnostics}
 par(mfrow = c(2, 2))
 plot(full)
 ```
 
-We used a Shapiro-Wilk test to check for normality and a Breusch-Pagan test for homoskedasticity. This model failed both, necessitating that we transform the data to fit the model. Thiswas done through
+We used a Shapiro-Wilk test to check for normality and a Breusch-Pagan test for homoskedasticity. This model failed both, necessitating that we transform the data to fit the model. This was done by taking the log of total mass.
 
 ```{r assumption-checks}
 check_normality(full)
 check_heteroscedasticity(full)
 ```
+
+Here are the plots after transforming the data. According to the Shapiro-Wilk and Breusch-Pagan tests this data is normally distributed and homoskedastic.
+
+```{r log-model, echo=FALSE}
+full_log <- lm(log(totmass) ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
+```
+
+```{r log-plots}
+par(mfrow = c(2, 2))
+plot(full_log)
+check_normality(full_log)
+check_heteroscedasticity(full_log)
+
+```
+
+This is a model showing the relationship between species and total mass. It is homoscedastic and normally distributed. This data could show how total mass varies by species. The difference in total mass could be due to a variation in species.
+
+```{r model2}
+model2_log <- lm(log(totmass) ~ species, data = plant_subset)
+
+par(mfrow = c(2, 2))
+plot(model2_log)
+
+check_normality(model2_log)
+check_heteroscedasticity(model2_log)
+
+```
+
+This model shows the relationship between feed level and total mass. The Shapiro-Wilk test failed, which means that the data is not normally distributed, so we can't run most tests since they assume normality. It would be interesting to see if the amount of food given to the plants could explain the difference in total mass.
+
+```{r model3}
+model3_log <- lm(log(totmass) ~ feedlevel, data = plant_subset)
+
+par(mfrow = c(2, 2))
+plot(model3_log)
+
+check_normality(model3_log)
+check_heteroscedasticity(model3_log)
+
+```
+
+This model shows the relationship of the number of leaves, chlorophyll content, feed level, and species to total mass. It would be useful if we could get an accurate prediction of total mass by using less variables than in the full model.
+
+```{r model4}
+model4_log <- lm(log(totmass) ~ num_lvs + chlorophyll + feedlevel + species, data = plant_subset)
+
+par(mfrow = c(2, 2))
+plot(model4_log)
+
+check_normality(model4_log)
+check_heteroscedasticity(model4_log)
+```
+
+Next, we evaluated multicollinearity. This is to see if multiple independent variables are correlated with each other. Through this evaluation, we found that species has high multicollinearity with another variables. We know this because the variance inflation factor was high for species.
+
+```{r vif}
+car::vif(full_log)
+```
+
+Comparing models: The last model (model 4) has the lowest Akaike's Information criterion value.
+
+```{r model-comparison}
+AICc(full_log)
+AICc(model2_log)
+AICc(model3_log)
+AICc(model4_log)
+
+MuMIn::AICc(full_log, model2_log, model3_log, model4_log)
+MuMIn::model.sel(full_log, model2_log, model3_log, model4_log)
+```
+
+## Results
+
+Model 4 was the best fit for the data because it had the lowest AIC value.
+
+```{r}
+summary(model4_log)
+```
+
+Model 4 takes into account number of leaves, chlorophyll content, feed level, and species. It says that these variables are good predictors of the total mass of the sarracenia plants.

@@ -123,10 +123,6 @@ plot(full_log)
 check_normality(full_log)
 check_heteroscedasticity(full_log)
 
-plot(full_log)
-check_normality(full_log)
-check_heteroscedasticity(full_log)
-
 ```
 
 evaluate multicollinearity
